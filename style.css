@@ -1286,6 +1286,48 @@ body {
 }
 
 /* =============================================
+   PWA FLOATING INSTALL BUTTON (FAB)
+   ============================================= */
+
+.pwa-fab {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99998;
+  animation: fabPop 0.5s 2.6s cubic-bezier(0.175,0.885,0.32,1.275) both;
+}
+
+@keyframes fabPop {
+  from { opacity:0; transform: translateX(-50%) scale(0.7) translateY(20px); }
+  to   { opacity:1; transform: translateX(-50%) scale(1)   translateY(0);    }
+}
+
+.pwa-fab-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 22px;
+  background: linear-gradient(135deg, #1D4ED8, #2563EB);
+  color: white;
+  border: none;
+  border-radius: 32px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 6px 28px rgba(29,78,216,0.55), 0 2px 8px rgba(0,0,0,0.25);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  letter-spacing: -0.2px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+}
+.pwa-fab-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 12px rgba(29,78,216,0.4);
+}
+
+/* =============================================
    INSTALL BANNER
    ============================================= */
 

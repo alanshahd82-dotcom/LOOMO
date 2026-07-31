@@ -652,6 +652,15 @@
   </div>
 </div>
 
+
+<!-- ===== PWA FLOATING INSTALL BUTTON ===== -->
+<div id="pwa-fab" class="pwa-fab" style="display:none;">
+  <button id="pwa-fab-btn" class="pwa-fab-btn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v13M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+    <span id="pwa-fab-label">تثبيت التطبيق</span>
+  </button>
+</div>
+
 <!-- ===== iOS INSTALL HINT ===== -->
 <div id="ios-hint" class="ios-hint" style="display:none;">
   <div class="ios-hint-inner">
@@ -666,61 +675,68 @@
 
 <script src="app.js"></script>
 <script>
-/* ── PWA Install Logic ────────────────────────────────── */
+/* ── PWA Install Logic v2 ─────────────────────────────── */
 (function(){
-  // Register service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
   }
 
-  // Already installed / standalone → hide everything
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
-  if (isStandalone) return;
+  if (isStandalone) return; // already installed — hide all install UI
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isMobile = window.innerWidth <= 500;
-  if (!isMobile) return;
+  const isMobile = window.innerWidth <= 768;
 
-  if (isIOS) {
-    // Show iOS hint after 3 s
-    setTimeout(() => {
+  /* ── floating FAB always visible on mobile ── */
+  function showFAB() {
+    const fab = document.getElementById('pwa-fab');
+    if (fab) fab.style.display = 'flex';
+  }
+  if (isMobile) setTimeout(showFAB, 2600); // show after splash starts fading
+
+  /* ── Android Chrome: intercept native prompt ── */
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const banner = document.getElementById('install-banner');
+    if (banner) banner.style.display = 'block';
+  });
+
+  /* ── FAB / banner install action ── */
+  function triggerInstall() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+      const banner = document.getElementById('install-banner');
+      if (banner) banner.style.display = 'none';
+      const fab = document.getElementById('pwa-fab');
+      if (fab) fab.style.display = 'none';
+    } else {
+      // iOS or no prompt — show manual instructions
       const h = document.getElementById('ios-hint');
       if (h) h.style.display = 'flex';
-    }, 3000);
-  } else {
-    // Android / Chrome — intercept install prompt
-    let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', e => {
-      e.preventDefault();
-      deferredPrompt = e;
       const banner = document.getElementById('install-banner');
-      if (banner) banner.style.display = 'block';
-      document.getElementById('install-btn').addEventListener('click', async () => {
-        banner.style.display = 'none';
-        deferredPrompt.prompt();
-        await deferredPrompt.userChoice;
-        deferredPrompt = null;
-      });
-    });
-    // Fallback: show banner after 4 s even without prompt event
-    setTimeout(() => {
-      if (!deferredPrompt) {
-        const banner = document.getElementById('install-banner');
-        if (banner) {
-          banner.style.display = 'block';
-          const sub = document.getElementById('install-banner-sub');
-          if (sub) sub.textContent = 'أضف للشاشة الرئيسية لتجربة كاملة';
-          const btn = document.getElementById('install-btn');
-          if (btn) { btn.textContent = 'كيف؟'; btn.onclick = () => {
-            banner.style.display = 'none';
-            const h = document.getElementById('ios-hint');
-            if (h) h.style.display = 'flex';
-          };}
-        }
-      }
-    }, 4000);
+      if (banner) banner.style.display = 'none';
+      const fab = document.getElementById('pwa-fab');
+      if (fab) fab.style.display = 'none';
+    }
   }
+
+  // wire up all install buttons
+  document.addEventListener('DOMContentLoaded', () => {
+    ['install-btn','pwa-fab-btn','install-btn-2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', triggerInstall);
+    });
+
+    if (isIOS && isMobile) {
+      // update FAB label for iOS
+      const lbl = document.getElementById('pwa-fab-label');
+      if (lbl) lbl.textContent = 'Add to Home Screen';
+    }
+  });
 })();
 </script>
 </body>
