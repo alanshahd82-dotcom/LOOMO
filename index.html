@@ -2,11 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 <meta name="theme-color" content="#1E3A8A"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>Loomo — Fintech App Prototype</title>
+<meta name="apple-mobile-web-app-title" content="Loomo"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<title>Loomo — Money without borders</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="assets/logo.jpeg"/>
+<link rel="icon" type="image/jpeg" href="assets/logo.jpeg"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="stylesheet" href="style.css"/>
@@ -634,6 +639,89 @@
 </div><!-- device-outer -->
 </div><!-- scene -->
 
+<!-- ===== INSTALL BANNER ===== -->
+<div id="install-banner" class="install-banner" style="display:none;">
+  <div class="install-banner-inner">
+    <img src="assets/logo.jpeg" class="install-banner-logo" alt="Loomo"/>
+    <div class="install-banner-text">
+      <strong>Loomo</strong>
+      <span id="install-banner-sub">Install for the full experience</span>
+    </div>
+    <button id="install-btn" class="install-banner-btn">Install</button>
+    <button class="install-banner-close" onclick="document.getElementById('install-banner').style.display='none'">✕</button>
+  </div>
+</div>
+
+<!-- ===== iOS INSTALL HINT ===== -->
+<div id="ios-hint" class="ios-hint" style="display:none;">
+  <div class="ios-hint-inner">
+    <span class="ios-hint-icon">📲</span>
+    <div class="ios-hint-text">
+      اضغط <strong>Share</strong> ثم <strong>Add to Home Screen</strong> لفتح التطبيق بدون شريط المتصفح
+    </div>
+    <button class="ios-hint-close" onclick="document.getElementById('ios-hint').style.display='none'">✕</button>
+  </div>
+  <div class="ios-hint-arrow">▼</div>
+</div>
+
 <script src="app.js"></script>
+<script>
+/* ── PWA Install Logic ────────────────────────────────── */
+(function(){
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+
+  // Already installed / standalone → hide everything
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+  if (isStandalone) return;
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isMobile = window.innerWidth <= 500;
+  if (!isMobile) return;
+
+  if (isIOS) {
+    // Show iOS hint after 3 s
+    setTimeout(() => {
+      const h = document.getElementById('ios-hint');
+      if (h) h.style.display = 'flex';
+    }, 3000);
+  } else {
+    // Android / Chrome — intercept install prompt
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const banner = document.getElementById('install-banner');
+      if (banner) banner.style.display = 'block';
+      document.getElementById('install-btn').addEventListener('click', async () => {
+        banner.style.display = 'none';
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+      });
+    });
+    // Fallback: show banner after 4 s even without prompt event
+    setTimeout(() => {
+      if (!deferredPrompt) {
+        const banner = document.getElementById('install-banner');
+        if (banner) {
+          banner.style.display = 'block';
+          const sub = document.getElementById('install-banner-sub');
+          if (sub) sub.textContent = 'أضف للشاشة الرئيسية لتجربة كاملة';
+          const btn = document.getElementById('install-btn');
+          if (btn) { btn.textContent = 'كيف؟'; btn.onclick = () => {
+            banner.style.display = 'none';
+            const h = document.getElementById('ios-hint');
+            if (h) h.style.display = 'flex';
+          };}
+        }
+      }
+    }, 4000);
+  }
+})();
+</script>
 </body>
 </html>

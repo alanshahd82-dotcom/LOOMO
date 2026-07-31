@@ -1,0 +1,27 @@
+{
+  "name": "Loomo — Money without borders",
+  "short_name": "Loomo",
+  "description": "Send money worldwide with zero hidden fees",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0D1F5C",
+  "theme_color": "#1E3A8A",
+  "icons": [
+    {
+      "src": "assets/logo.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/logo.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance"],
+  "lang": "en"
+}
