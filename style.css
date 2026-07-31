@@ -1261,20 +1261,20 @@ body {
    ============================================= */
 
 /* Scale device frame on small screens */
-@media (max-height: 900px) {
+@media (max-height: 900px) and (min-width: 501px) {
   .device-frame {
     transform: scale(0.95);
     transform-origin: center center;
   }
 }
 
-@media (max-height: 820px) {
+@media (max-height: 820px) and (min-width: 501px) {
   .device-frame {
     transform: scale(0.88);
   }
 }
 
-@media (max-height: 700px) {
+@media (max-height: 700px) and (min-width: 501px) {
   .device-frame {
     transform: scale(0.78);
   }
@@ -1285,28 +1285,59 @@ body {
   .device-info-panel { display:flex; }
 }
 
-/* Tablet portrait: just center the device */
+/* ── MOBILE PHONES: Full-screen native app experience ─────────────────────── */
 @media (max-width: 500px) {
-  .device-frame {
-    width: 100vw;
+  /* Fix iOS Safari 100vh (address bar eats space) */
+  html {
+    height: -webkit-fill-available;
+  }
+
+  body {
     height: 100vh;
+    height: 100dvh;
+    height: -webkit-fill-available;
+    background: var(--bg-app);
+    overflow: hidden;
+  }
+
+  .bg-orb { display: none; }
+
+  /* Scene and device-outer fill the whole screen */
+  .scene {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    height: -webkit-fill-available;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .device-outer {
+    width: 100%;
+    height: 100%;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  /* Remove the phone-frame chrome entirely */
+  .device-frame {
+    width: 100%;
+    height: 100%;
     border-radius: 0;
     box-shadow: none;
+    background: var(--bg-app);
+    flex-shrink: 1;
   }
+
+  /* Screen fills the frame edge-to-edge */
   .device-screen {
     inset: 0;
     border-radius: 0;
   }
-  .dynamic-island { display:none; }
-  .device-frame::before, .device-frame::after { display:none; }
-  body { background: var(--bg-app); }
-  .bg-orb { display:none; }
-}
 
-/* Very small: remove device chrome entirely */
-@media (max-width: 370px) {
-  .device-frame {
-    width:100vw;height:100vh;
-    border-radius:0;box-shadow:none;
-  }
+  /* Hide mockup decorations */
+  .dynamic-island           { display: none; }
+  .device-frame::before,
+  .device-frame::after      { display: none; }
+  .device-info-panel        { display: none !important; }
 }
